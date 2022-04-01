@@ -3,7 +3,7 @@ import numpy as np
 from sklearn.linear_model import LinearRegression
 
 
-ticker = "AAPL"
+ticker = "COIN"
 
 class WACC_data():
 
@@ -43,6 +43,7 @@ class WACC_data():
         y = np.array(stock_history["Continuous Return"][1:]).reshape(-1, 1)
         x = np.array(spy_history["Continuous Return"][1:]).reshape(-1, 1)
 
+        x = x[:len(y)] if len(y) < 120 else x
 
         model = LinearRegression().fit(x, y)
         beta = float(model.coef_)
@@ -77,7 +78,11 @@ class WACC_data():
 
     def get_cost_of_debt(self):
         print("Calculating Cost of Debt")
-        interest_expense = -self.income_statement_data.iloc[10, 0]
+        
+        try:
+            interest_expense = -self.income_statement_data.iloc[10, 0]
+        except TypeError:
+            interest_expense = 0
 
         total_debt = self.get_debt_value()
         effective_tax_rate = self.get_tax_rate()
@@ -107,5 +112,6 @@ def get_WACC(ticker):
     wacc = (percent_equity * cost_of_equity) + (percent_debt * cost_of_debt * (1 - tax_rate))
     return wacc
 
-if __name__ == 'main':
-    get_WACC(ticker)
+if __name__ == '__main__':
+    test = get_WACC(ticker)
+    print(test)
